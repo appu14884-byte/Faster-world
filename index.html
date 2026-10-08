@@ -1,340 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Faster World – Typing Adventure</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Faster World – Type Your Way Across the Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --night:#13243b; --dusk:#24406a; --sand:#efd49b; --coral:#ff7a59; --moss:#7fc58a; --ink:#0d1a2b; --paper:#f7f3e8; --mute:#9db0c9;
-  --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.18);
-}
-*{box-sizing:border-box;margin:0}
-html,body{min-height:100%}
-body{font-family:'Fredoka',system-ui,sans-serif;color:var(--paper);background:linear-gradient(180deg,var(--night) 0%,var(--dusk) 60%,#3b5d8f 100%) fixed;line-height:1.5}
-button{font:inherit;cursor:pointer;border:0;color:inherit}
-:focus-visible{outline:3px solid var(--sand);outline-offset:2px}
-header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;padding:14px clamp(14px,4vw,40px);border-bottom:1px solid var(--line)}
-.logo{font-size:1.6rem;font-weight:700;letter-spacing:.2px}
-.logo span{color:var(--coral)}
-nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.tab{background:transparent;padding:8px 16px;border-radius:999px;border:1px solid var(--line)}
-.tab[aria-current="page"]{background:var(--sand);color:var(--ink);border-color:var(--sand);font-weight:600}
-.who{font-size:.9rem;color:var(--mute)}
-.btn{background:var(--coral);color:var(--ink);font-weight:600;padding:10px 20px;border-radius:12px}
-.btn.alt{background:transparent;color:var(--paper);border:1px solid var(--line)}
-main{max-width:860px;margin:0 auto;padding:28px clamp(14px,4vw,24px) 60px}
-h1{font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.15;margin-bottom:6px}
-.sub{color:var(--mute);margin-bottom:26px}
-.hidden{display:none!important}
-
-/* trail */
-.trail{list-style:none;padding:0;position:relative}
-.trail::before{content:"";position:absolute;left:27px;top:20px;bottom:20px;border-left:3px dashed var(--line)}
-.trail li{position:relative;padding-left:70px;margin-bottom:14px}
-.node{position:absolute;left:0;top:6px;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:1.2rem;background:var(--sand);color:var(--ink);border:4px solid var(--night)}
-.lvl{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.lvl:hover:not(:disabled){background:rgba(255,255,255,.13)}
-.lvl b{font-size:1.1rem;display:block}
-.lvl small{color:var(--mute)}
-.stars{font-size:1.2rem;letter-spacing:2px;white-space:nowrap;color:var(--sand)}
-.locked .node{background:#40526e;color:#8aa0bf}
-.locked .lvl{opacity:.55;cursor:not-allowed}
-
-/* play */
-.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.track{position:relative;height:14px;border-radius:999px;background:rgba(255,255,255,.12);margin:26px 0 22px}
-.fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--moss),var(--sand));transition:width .12s}
-.hiker{position:absolute;top:-22px;left:0;font-size:1.5rem;transform:translateX(-50%);transition:left .12s}
-.flag{position:absolute;right:-6px;top:-24px;font-size:1.5rem}
-.box{background:rgba(8,16,30,.55);border:2px solid var(--line);border-radius:18px;padding:22px clamp(14px,3vw,28px);font-family:'JetBrains Mono',monospace;font-size:clamp(1.15rem,2.6vw,1.6rem);line-height:2;min-height:150px;cursor:text;word-break:break-word}
-.box.focus{border-color:var(--sand)}
-.box span{border-radius:3px}
-.box .ok{color:var(--moss)}
-.box .cur{background:var(--sand);color:var(--ink)}
-.box .bad{background:var(--coral);color:var(--ink)}
-.hint{text-align:center;color:var(--mute);margin-top:10px;font-size:.95rem}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
-.stat b{display:block;font-size:1.6rem}
-.stat small{color:var(--mute)}
-#hid{position:fixed;opacity:0;pointer-events:none;left:-100px;top:0;width:1px;height:1px}
-
-/* dashboard */
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px}
-.bars{display:flex;align-items:flex-end;gap:8px;height:150px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
-.bar{flex:1;background:var(--moss);border-radius:6px 6px 0 0;position:relative;min-height:4px}
-.bar i{position:absolute;top:-20px;left:0;right:0;text-align:center;font-style:normal;font-size:.75rem;color:var(--mute)}
-h2{font-size:1.3rem;margin:0 0 10px}
-
-dialog{border:0;border-radius:22px;padding:28px;max-width:420px;width:calc(100% - 28px);background:var(--paper);color:var(--ink);text-align:center}
-dialog::backdrop{background:rgba(5,12,24,.7)}
-dialog h2{font-size:1.7rem}
-dialog .big{font-size:2.2rem;letter-spacing:6px;color:#e0a526;margin:8px 0}
-dialog .row{display:flex;justify-content:center;gap:22px;margin:12px 0 20px}
-dialog .row b{font-size:1.5rem;display:block}
-dialog .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-dialog .btn.alt{color:var(--ink);border-color:#c9c2ad}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+:root{--bg:#e9f3f1;--card:#ffffff;--ink:#14313a;--mut:#4f6b72;--line:#c5dad6;--moss:#237a5a;--sun:#f2a33a;--bad:#d1453b;--sky1:#2b3f78;--sky2:#f2a33a;--hill:#14313a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1a22;--card:#12272f;--ink:#e7f3f0;--mut:#98b5ba;--line:#24434c;--moss:#4cc38f;--sky1:#10163a;--sky2:#c4672b;--hill:#07121a}}
+:root[data-theme="dark"]{--bg:#0b1a22;--card:#12272f;--ink:#e7f3f0;--mut:#98b5ba;--line:#24434c;--moss:#4cc38f;--sky1:#10163a;--sky2:#c4672b;--hill:#07121a}
+html,body{height:auto}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;line-height:1.5}
+h1,h2,h3{font-family:'Lilita One',Impact,sans-serif;font-weight:400;margin:0;letter-spacing:.01em}
+.wrap{max-width:860px;margin:0 auto;padding:0 18px}
+header.hero{background:linear-gradient(180deg,var(--sky1),var(--sky2));color:#fff;position:relative;overflow:hidden;padding:28px 0 0}
+.top{display:flex;justify-content:space-between;align-items:center;font-weight:800}
+.logo{font-family:'Lilita One',sans-serif;font-size:1.4rem}
+.best{background:rgba(255,255,255,.18);padding:6px 12px;border-radius:99px;font-size:.9rem}
+.hero h1{font-size:clamp(2.2rem,8vw,4rem);line-height:1.05;margin:42px 0 12px;max-width:620px}
+.hero p{max-width:480px;font-size:1.1rem;margin:0 0 22px}
+.btn{font:inherit;font-weight:800;border:0;border-radius:12px;padding:13px 22px;cursor:pointer;background:var(--sun);color:#2a1a05;font-size:1.05rem}
+.btn.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn:focus-visible,.lv:focus-visible,#area:focus-visible{outline:3px solid var(--moss);outline-offset:2px}
+.hero svg{display:block;width:100%;height:auto;margin-top:18px}
+section{padding:34px 0}
+h2{font-size:1.8rem;margin-bottom:6px}
+.sub{color:var(--mut);margin:0 0 18px}
+.map{display:grid;gap:12px}
+.lv{display:flex;align-items:center;gap:14px;text-align:left;width:100%;font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 16px;cursor:pointer}
+.lv[disabled]{opacity:.55;cursor:not-allowed}
+.lv .em{font-size:2rem;width:46px;text-align:center}
+.lv b{display:block;font-size:1.05rem}
+.lv small{color:var(--mut)}
+.lv .st{margin-left:auto;font-size:1.2rem;white-space:nowrap}
+.lv:not([disabled]):hover{border-color:var(--moss)}
+#game,#res{display:none}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.pill{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:800}
+.pill span{color:var(--moss)}
+#area{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:20px;font:1.35rem/1.9 ui-monospace,Menlo,Consolas,monospace;cursor:text;min-height:150px;word-break:break-word}
+#area .ok{color:var(--moss)}
+#area .bad{color:#fff;background:var(--bad);border-radius:3px}
+#area .cur{border-bottom:3px solid var(--sun);background:rgba(242,163,58,.25)}
+#inp{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.hint{color:var(--mut);font-size:.9rem;margin-top:8px}
+.stars{font-size:2.6rem;margin:6px 0}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.tip{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px}
+.tip h3{font-size:1.15rem;margin-bottom:4px}
+.tip p{margin:0;color:var(--mut)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+footer{padding:26px 0 40px;color:var(--mut);text-align:center;font-size:.9rem}
+@media (prefers-reduced-motion:no-preference){.hero h1{animation:rise .7s ease-out both}@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}}
+.hero .btn{margin:0 8px 10px 0}
+.hero .btn.alt{color:#fff;border-color:rgba(255,255,255,.75)}
+#gg{width:100%;margin:0 0 6px;display:flex;justify-content:center;gap:10px;align-items:center}
+#gg b{font-family:'Lilita One',sans-serif;color:#4285f4;font-size:1.2rem;font-weight:400}
+.or{text-align:center;color:var(--mut);margin:8px 0 14px}
+#auth{display:none;max-width:440px;margin:0 auto}
+.fld{display:block;font-weight:800;margin-bottom:12px}
+.fld input{display:block;width:100%;margin-top:4px;font:inherit;padding:11px 12px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+.fld input:focus-visible{outline:3px solid var(--moss);outline-offset:1px}
+.chk{display:block;color:var(--mut);margin-bottom:8px}
+.err{color:var(--bad);font-weight:800;min-height:1.4em;margin:4px 0 8px}
+.lk{all:unset;cursor:pointer;text-decoration:underline}
+.lk:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.spark{display:flex;align-items:flex-end;gap:5px;height:70px;margin:14px 0 4px}
+.spark i{flex:1;background:var(--moss);border-radius:4px 4px 0 0;min-height:4px}
+.tip b{display:block;font-family:'Lilita One',sans-serif;font-size:1.6rem;font-weight:400;color:var(--moss)}
+#dash{margin-bottom:26px}
+#dash ul{margin:8px 0 0;padding-left:18px;color:var(--mut)}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">🧭 Faster <span>World</span></div>
-  <nav>
-    <button class="tab" id="tabTrail" aria-current="page">Trail</button>
-    <button class="tab" id="tabDash">Dashboard</button>
-    <span class="who" id="who">Guest explorer</span>
-    <button class="btn alt hidden" id="authBtn">Sign in with Google</button>
-  </nav>
+<header class="hero">
+ <div class="wrap">
+  <div class="top"><div class="logo">⌨ Faster World</div><div class="best" id="acct"></div></div>
+  <h1>Type your way across the map.</h1>
+  <p>Cross the forest, the river and the mountains, then reach the castle in the clouds. Every line you type gets you faster and more accurate.</p>
+  <button class="btn" id="go">Start the adventure</button><button class="btn alt" id="hs" type="button">Sign up free</button>
+ </div>
+ <svg viewBox="0 0 800 130" preserveAspectRatio="none" aria-hidden="true"><path d="M0 130V80l90-45 80 50 110-70 120 80 100-55 130 75 80-30 90 45v50z" fill="var(--hill)" opacity=".55"/><path d="M0 130V105l120-40 100 45 140-50 120 55 130-45 190 40v20z" fill="var(--hill)"/></svg>
 </header>
 
-<main>
-  <section id="trailView">
-    <h1>Choose your next checkpoint</h1>
-    <p class="sub">Type each trail correctly to earn stars and unlock the next level.</p>
-    <ol class="trail" id="trail"></ol>
-  </section>
+<main class="wrap">
+ <section id="auth">
+  <h2 id="at"></h2>
+  <p class="sub" id="asub"></p>
+  <button class="btn alt" id="gg" type="button"><b>G</b> Continue with Google</button>
+  <p class="or">or use your email</p>
+  <form id="af" novalidate>
+   <label class="fld" style="display:none">Name<input id="nm" autocomplete="name"></label>
+   <label class="fld">Email<input id="em" type="email" autocomplete="email"></label>
+   <label class="fld">Password<input id="pw" type="password" autocomplete="current-password"></label>
+   <label class="chk"><input type="checkbox" id="sp"> Show password</label>
+   <p id="aerr" class="err" role="alert"></p>
+   <button class="btn" id="sub" type="submit">Continue</button>
+  </form>
+  <div class="row"><button class="btn alt" id="sw" type="button"></button><button class="btn alt" id="gs" type="button">Continue as guest</button></div>
+  <p class="hint">Accounts are saved in this browser only. Use a password you do not use anywhere else.</p>
+ </section>
 
-  <section id="playView" class="hidden">
-    <div class="top">
-      <div><h1 id="pTitle" style="font-size:1.6rem"></h1><span class="sub" id="pGoal" style="margin:0"></span></div>
-      <button class="btn alt" id="backBtn">Back to trail</button>
-    </div>
-    <div class="track"><div class="fill" id="fill"></div><span class="hiker" id="hiker">🧭</span><span class="flag">🏁</span></div>
-    <div class="box" id="box" tabindex="0" aria-label="Typing area"></div>
-    <p class="hint" id="hint">Click the box and start typing. The timer begins with your first key.</p>
-    <div class="stats">
-      <div class="stat"><b id="sWpm">0</b><small>words per minute</small></div>
-      <div class="stat"><b id="sAcc">100%</b><small>accuracy</small></div>
-      <div class="stat"><b id="sTime">0.0s</b><small>time</small></div>
-    </div>
-  </section>
+ <section id="home">
+  <div id="dash"></div>
+  <h2>Your quest map</h2>
+  <p class="sub">Finish a level with 1 star to open the next one. Chase 3 stars for speed and accuracy.</p>
+  <div class="map" id="map"></div>
+ </section>
 
-  <section id="dashView" class="hidden">
-    <h1>Your dashboard</h1>
-    <p class="sub" id="dashSub"></p>
-    <div class="cards" id="cards"></div>
-    <h2>Last 10 runs (words per minute)</h2>
-    <div class="bars" id="bars"></div>
-  </section>
+ <section id="game">
+  <h2 id="gt"></h2>
+  <div class="bar"><div class="pill">Time <span id="tm">0.0</span>s</div><div class="pill">Speed <span id="lw">0</span> WPM</div><div class="pill">Goal <span id="gw"></span> WPM</div></div>
+  <div id="area" tabindex="0" role="textbox" aria-label="Typing area"></div>
+  <textarea id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type here"></textarea>
+  <p class="hint">Click the text and start typing. The timer begins with your first key.</p>
+  <div class="row"><button class="btn alt" id="back">Back to map</button></div>
+ </section>
+
+ <section id="res">
+  <h2 id="rt"></h2>
+  <div class="stars" id="rs"></div>
+  <div class="bar"><div class="pill">Speed <span id="rw"></span> WPM</div><div class="pill">Accuracy <span id="ra"></span>%</div><div class="pill">Time <span id="rtm"></span>s</div></div>
+  <p id="rm" class="sub"></p>
+  <div class="row"><button class="btn" id="nx">Next level</button><button class="btn alt" id="rt2">Try again</button><button class="btn alt" id="rb">Back to map</button></div>
+ </section>
+
+ <section>
+  <h2>How to type faster</h2>
+  <p class="sub">Three habits that help most.</p>
+  <div class="grid3">
+   <div class="tip"><h3>Accuracy first</h3><p>Slow down until mistakes are rare. Speed comes on its own after that.</p></div>
+   <div class="tip"><h3>Eyes on the screen</h3><p>Do not look at the keys. Your fingers learn the places faster than you think.</p></div>
+   <div class="tip"><h3>Short daily runs</h3><p>10 minutes every day beats one long session once a week.</p></div>
+  </div>
+ </section>
 </main>
+<footer>Faster World · Practice a little every day</footer>
 
-<input id="hid" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="-1">
-
-<dialog id="result">
-  <h2 id="rTitle"></h2>
-  <div class="big" id="rStars"></div>
-  <div class="row">
-    <div><b id="rWpm"></b>WPM</div>
-    <div><b id="rAcc"></b>accuracy</div>
-    <div><b id="rTime"></b>time</div>
-  </div>
-  <p id="rMsg" style="margin-bottom:16px"></p>
-  <div class="acts">
-    <button class="btn" id="rNext">Next level</button>
-    <button class="btn alt" id="rRetry">Try again</button>
-    <button class="btn alt" id="rTrail">Trail</button>
-  </div>
-</dialog>
-
-<script type="module">
-/* ============ 1. FIREBASE SETTINGS (optional) ============
-   Paste your own values from Firebase console -> Project settings -> Your apps.
-   Leave as is to play as a guest (progress is saved in this browser only). */
-const firebaseConfig = {
-  apiKey: " "AIzaSyAFY84NcrpXO3TCrDvjQm4tbFghBJ31-uc",
-  authDomain: ""faster-typing.firebaseapp.com",",
-  projectId: ""faster-typing",
-  appId: ""1:58013373022:web:4a3be4a6c6ac637b8bdacf","
-};
-
-/* ============ 2. LEVELS ============ */
-const W = s => s.split(' ');
-const LEVELS = [
-  {name:'Base Camp', icon:'⛺', note:'Home row keys', n:16, wpm:8,  pool:W('ask sad dad fall flask lad salad glad hall half shall flash fads gash dash hash slash lass alfalfa')},
-  {name:'Pine Trail', icon:'🌲', note:'Top row keys', n:16, wpm:10, pool:W('type quit tower write report your tree pure power outer rope pet wipe tip yet rip trip poetry require pretty')},
-  {name:'Rope Bridge', icon:'🌉', note:'Bottom row keys', n:16, wpm:10, pool:W('zoom cave back mix vex bun calm next buzz brave move number maze cabin combine zen vibe banner crumb')},
-  {name:'Quiet Forest', icon:'🌳', note:'Short everyday words', n:20, wpm:12, pool:W('the and you for are but not all can had her was one our out day get has him his how man new now old see two way who boy did its let put say she too use')},
-  {name:'Misty Mountain', icon:'⛰️', note:'Longer words', n:14, wpm:14, pool:W('mountain adventure wonderful together practice keyboard mission strength careful journey beautiful discover explore finger quickly distance morning evening courage freedom')},
-  {name:'Treasure Cave', icon:'💎', note:'Adventure words', n:18, wpm:16, pool:W('jungle compass treasure river mountain canyon lantern summit journey glacier island explorer map trail camp bridge cave desert storm sunrise')},
-  {name:'River Crossing', icon:'🛶', note:'Easy sentences', n:3, wpm:18, sent:['The river runs past the old camp.','We climb the hill before the sun is up.','A small boat waits by the bridge.','Pack your map and a bottle of water.','The path turns left at the tall pine.','Birds sing when the morning light comes.','Keep walking and you will find the lake.']},
-  {name:'Windy Ridge', icon:'🌬️', note:'Punctuation', n:3, wpm:20, sent:['Look, the cave is just ahead!','Did you bring the compass, or the map?','Wait, I hear water; it must be the river.',"It's cold at night, so wear a warm coat.","Ready? Let's go, the summit awaits!","Don't stop now; we're almost there."]},
-  {name:'Speed Sprint', icon:'⚡', note:'Fast common words', n:30, wpm:25, pool:W('time year people way day man thing woman life child world school state family student group country problem hand part place case week company system program question work number night point home water room mother area money story fact month lot right study book eye job word business issue side kind head house service friend father power hour game line end member law car city')},
-  {name:'Summit', icon:'🏔️', note:'Final challenge', n:4, wpm:28, sent:['The explorer crossed the glacier at dawn and reached the summit before the storm arrived.','Every great journey begins with a single step and a steady rhythm of keys.','Fast fingers and calm focus will carry you past the final checkpoint.','Lanterns glowed along the canyon wall as the team made camp for the night.']}
+<script>
+const L=[
+{n:"Whispering Forest",e:"🌲",w:20,t:"the quick brown fox runs through the forest and jumps over the old log"},
+{n:"Misty River",e:"🌊",w:25,t:"a small boat drifts down the river while the morning mist rises slowly above the water"},
+{n:"Mountain Pass",e:"⛰️",w:30,t:"climb the steep trail with steady steps and keep your eyes on the shining peak ahead"},
+{n:"Dragon's Cave",e:"🐉",w:35,t:"deep inside the glowing cave the brave hero finds a golden treasure guarded by a sleepy dragon"},
+{n:"Golden Desert",e:"🏜️",w:38,t:"the hot sun rises over the golden dunes as a lone camel walks slowly toward a hidden oasis"},
+{n:"Pirate Bay",e:"🏴‍☠️",w:42,t:"The pirate captain raised his flag, called the crew to the deck, and sailed the stormy sea in search of gold."},
+{n:"Frozen Tundra",e:"❄️",w:45,t:"Snow falls softly on the frozen plains, so wrap your scarf tight, light the lantern, and march on through the icy wind."},
+{n:"Haunted Swamp",e:"👻",w:48,t:"Under the pale moon, the swamp whispers; lanterns flicker, frogs croak, and a brave traveler must cross the creaking bridge before midnight."},
+{n:"Volcano Peak",e:"🌋",w:52,t:"At 9:30 the ground shakes! Run past rivers of glowing lava, jump the cracks, and grab the fire crystal before the volcano erupts."},
+{n:"Sky Castle",e:"🏰",w:55,t:"Welcome, traveler! You typed your way past forests, rivers, and mountains to reach the castle in the clouds."}
 ];
-
-/* ============ 3. PROGRESS ============ */
-const $ = s => document.querySelector(s);
-const blank = () => ({levels:{}, history:[], plays:0});
-let state = (() => { try { return JSON.parse(localStorage.getItem('fw_progress')) || blank(); } catch { return blank(); } })();
-const saveLocal = () => { try { localStorage.setItem('fw_progress', JSON.stringify(state)); } catch {} };
-function merge(a, b){
-  const out = blank();
-  const keys = new Set([...Object.keys(a.levels||{}), ...Object.keys(b.levels||{})]);
-  keys.forEach(k => {
-    const x = (a.levels||{})[k] || {stars:0,bestWpm:0,bestAcc:0}, y = (b.levels||{})[k] || {stars:0,bestWpm:0,bestAcc:0};
-    out.levels[k] = {stars:Math.max(x.stars,y.stars), bestWpm:Math.max(x.bestWpm,y.bestWpm), bestAcc:Math.max(x.bestAcc,y.bestAcc)};
-  });
-  const seen = new Set();
-  out.history = [...(a.history||[]), ...(b.history||[])].sort((p,q)=>p.t-q.t).filter(h => !seen.has(h.t) && seen.add(h.t)).slice(-30);
-  out.plays = Math.max(a.plays||0, b.plays||0);
-  return out;
+let S={s:[],b:0,h:[]},U=null;
+const rd=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}};
+const wr=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const pk=()=>U?'tw1_'+U.email:'tw1';
+function loadS(){const r=rd(pk());S=(r&&Array.isArray(r.s))?r:{s:[],b:0};if(!Array.isArray(S.h))S.h=[];if(S.v!==2){if(S.s[4]){S.s[9]=S.s[4];S.s[4]=0}S.v=2}}
+const save=()=>wr(pk(),S);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+let cur=0,st=0,tot=0,er=0,iv=null,done=false;
+const star=n=>'★'.repeat(n)+'☆'.repeat(3-n);
+function show(v){['auth','home','game','res'].forEach(x=>$(x).style.display=x===v?'block':'none');window.scrollTo({top:$('home').offsetTop-20,behavior:'smooth'})}
+function map(){
+ dash();
+ $('map').innerHTML='';
+ L.forEach((l,i)=>{
+  const open=i===0||(S.s[i-1]||0)>0;
+  const b=document.createElement('button');b.className='lv';b.disabled=!open;
+  b.innerHTML='<span class="em">'+l.e+'</span><span><b>'+l.n+'</b><small>Goal: '+l.w+' WPM</small></span><span class="st">'+(open?star(S.s[i]||0):'🔒')+'</span>';
+  b.onclick=()=>play(i);$('map').appendChild(b);
+ });
 }
-const unlocked = i => i === 0 || ((state.levels[i-1]||{}).stars > 0);
-
-/* ============ 4. VIEWS ============ */
-function show(name){
-  ['trail','play','dash'].forEach(v => $('#'+v+'View').classList.toggle('hidden', v !== name));
-  $('#tabTrail').setAttribute('aria-current', name === 'dash' ? 'false' : 'page');
-  $('#tabDash').setAttribute('aria-current', name === 'dash' ? 'page' : 'false');
-  if(name === 'trail') renderTrail();
-  if(name === 'dash') renderDash();
+function draw(v){
+ const t=L[cur].t;let h='';
+ for(let i=0;i<t.length;i++){
+  const c=t[i]===' '?'&nbsp;':t[i].replace('<','&lt;');
+  let k='';
+  if(i<v.length)k=v[i]===t[i]?'ok':'bad';else if(i===v.length)k='cur';
+  h+='<span class="'+k+'">'+c+'</span>';
+ }
+ $('area').innerHTML=h;
 }
-function renderTrail(){
-  const ol = $('#trail'); ol.innerHTML = '';
-  LEVELS.forEach((L, i) => {
-    const li = document.createElement('li');
-    const open = unlocked(i), p = state.levels[i];
-    if(!open) li.className = 'locked';
-    li.innerHTML = `<div class="node">${i+1}</div>
-      <button class="lvl" ${open ? '' : 'disabled'}><span><b>${L.icon} ${L.name}</b><small>${L.note} · goal ${L.wpm} WPM${p ? ' · best ' + p.bestWpm : ''}</small></span><span class="stars">${open ? '★'.repeat(p ? p.stars : 0) + '☆'.repeat(3 - (p ? p.stars : 0)) : '🔒'}</span></button>`;
-    if(open) li.querySelector('button').addEventListener('click', () => start(i));
-    ol.appendChild(li);
-  });
+function play(i){
+ cur=i;st=0;tot=0;er=0;done=false;clearInterval(iv);
+ $('gt').textContent=L[i].e+' '+L[i].n;$('gw').textContent=L[i].w;
+ $('tm').textContent='0.0';$('lw').textContent='0';
+ $('inp').value='';draw('');show('game');
+ setTimeout(()=>$('inp').focus(),50);
 }
-function renderDash(){
-  const lv = Object.values(state.levels), h = state.history;
-  const cleared = lv.filter(x => x.stars > 0).length, stars = lv.reduce((a,x)=>a+x.stars,0);
-  const best = h.reduce((m,x)=>Math.max(m,x.wpm),0);
-  const last = h.slice(-10), avg = last.length ? Math.round(last.reduce((a,x)=>a+x.wpm,0)/last.length) : 0;
-  const acc = last.length ? Math.round(last.reduce((a,x)=>a+x.acc,0)/last.length) : 0;
-  $('#dashSub').textContent = user ? 'Signed in as ' + (user.displayName || user.email) + '. Progress is saved to your account.' : 'Guest mode. Progress is saved in this browser only.';
-  const items = [[cleared+'/'+LEVELS.length,'levels cleared'],[stars+'/'+LEVELS.length*3,'stars earned'],[best,'best WPM'],[avg,'average WPM (last 10)'],[acc+'%','average accuracy'],[state.plays,'runs played']];
-  $('#cards').innerHTML = items.map(([v,l]) => `<div class="stat"><b>${v}</b><small>${l}</small></div>`).join('');
-  const max = Math.max(10, ...last.map(x=>x.wpm));
-  $('#bars').innerHTML = last.length ? last.map(x => `<div class="bar" style="height:${Math.max(4, x.wpm/max*100)}%"><i>${x.wpm}</i></div>`).join('') : '<span class="sub" style="margin:auto">Finish a level to see your speed here.</span>';
+function tick(){
+ const v=$('inp').value,m=(Date.now()-st)/60000;
+ let ok=0;for(let i=0;i<v.length;i++)if(v[i]===L[cur].t[i])ok++;
+ $('tm').textContent=(m*60).toFixed(1);
+ $('lw').textContent=m>0?Math.round(ok/5/m):0;
 }
-
-/* ============ 5. GAME ============ */
-let g = null, spans = [];
-const hid = $('#hid'), box = $('#box');
-const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
-function makeText(L){
-  if(L.sent) return shuffle(L.sent).slice(0, L.n).join(' ');
-  const out = []; let prev = '';
-  for(let i=0;i<L.n;i++){ let w; do { w = L.pool[Math.floor(Math.random()*L.pool.length)]; } while(w === prev && L.pool.length > 1); out.push(w); prev = w; }
-  return out.join(' ');
+$('area').onclick=()=>$('inp').focus();
+$('inp').onpaste=e=>e.preventDefault();
+$('inp').oninput=e=>{
+ if(done)return;
+ const t=L[cur].t;let v=$('inp').value;
+ if(!st){st=Date.now();iv=setInterval(tick,150)}
+ if(e.inputType&&e.inputType.indexOf('insert')===0&&v.length){tot++;if(v[v.length-1]!==t[v.length-1])er++}
+ if(v.length>t.length){v=v.slice(0,t.length);$('inp').value=v}
+ draw(v);
+ if(v.length===t.length)finish(v);
+};
+function finish(v){
+ done=true;clearInterval(iv);
+ const l=L[cur],t=l.t,m=Math.max((Date.now()-st)/60000,.0005);
+ let ok=0;for(let i=0;i<t.length;i++)if(v[i]===t[i])ok++;
+ const wpm=Math.round(ok/5/m),acc=tot?Math.max(0,Math.round((tot-er)/tot*100)):100;
+ let s=0;
+ if(acc>=80)s=1;
+ if(s&&wpm>=l.w&&acc>=90)s=2;
+ if(s>1&&wpm>=Math.round(l.w*1.4)&&acc>=96)s=3;
+ if(s>(S.s[cur]||0))S.s[cur]=s;
+ if(wpm>S.b)S.b=wpm;
+ S.h.push({n:l.n,w:wpm,a:acc});S.h=S.h.slice(-30);
+ save();
+ $('rt').textContent=s?(cur===L.length-1&&s?'You reached the castle!':'Level complete!'):'Almost there';
+ $('rs').textContent=star(s);
+ $('rw').textContent=wpm;$('ra').textContent=acc;$('rtm').textContent=(m*60).toFixed(1);
+ $('rm').textContent=s===0?'Aim for at least 80% accuracy to earn a star. Slow down and try again.':s===1?'Reach '+l.w+' WPM with 90% accuracy for 2 stars.':s===2?'Reach '+Math.round(l.w*1.4)+' WPM with 96% accuracy for 3 stars.':'Perfect run. Nothing left to improve here.';
+ $('nx').style.display=(s>0&&cur<L.length-1)?'inline-block':'none';
+ map();show('res');
 }
-function start(i){
-  const L = LEVELS[i];
-  g = {i, text:makeText(L), pos:0, ok:0, bad:0, t0:0, timer:null, done:false};
-  $('#pTitle').textContent = L.icon + ' ' + L.name;
-  $('#pGoal').textContent = 'Goal: ' + L.wpm + ' WPM with 85% accuracy';
-  box.innerHTML = '';
-  spans = [...g.text].map(c => { const s = document.createElement('span'); s.textContent = c; box.appendChild(s); return s; });
-  spans[0].className = 'cur';
-  updateStats(); show('play'); hid.focus();
+$('go').onclick=()=>{const i=L.findIndex((_,k)=>(S.s[k]||0)===0&&(k===0||(S.s[k-1]||0)>0));play(i<0?0:i)};
+$('nx').onclick=()=>play(cur+1);
+$('rt2').onclick=()=>play(cur);
+$('rb').onclick=$('back').onclick=()=>{clearInterval(iv);show('home')};
+function dash(){
+ const a=$('acct'),d=$('dash');
+ a.innerHTML=U?'Hi, '+esc(U.name)+' · <button class="lk" id="lo" type="button">Log out</button>':'<button class="lk" id="li" type="button">Log in</button> · <button class="lk" id="su" type="button">Sign up</button>';
+ $(U?'lo':'li').onclick=()=>U?logout():authView('in');
+ if(!U)$('su').onclick=()=>authView('up');
+ $('hs').style.display=U?'none':'inline-block';
+ if(!U){d.innerHTML='<div class="tip"><h3>Keep your progress on a dashboard</h3><p>Create a free account to see your best speed, stars and recent runs.</p></div>';return}
+ const h=S.h,stars=S.s.reduce((x,y)=>x+(y||0),0),cl=S.s.filter(x=>x>0).length,avg=h.length?Math.round(h.reduce((x,r)=>x+r.a,0)/h.length):0;
+ const c=(t,v)=>'<div class="tip"><p>'+t+'</p><b>'+v+'</b></div>';
+ const mx=Math.max(20,...h.map(r=>r.w));
+ d.innerHTML='<h2>Welcome back, '+esc(U.name)+'</h2><p class="sub">Your typing progress at a glance.</p><div class="grid3">'+c('Best speed',(S.b||0)+' WPM')+c('Stars',stars+' / '+L.length*3)+c('Levels cleared',cl+' / '+L.length)+c('Average accuracy',avg+'%')+'</div>'
+ +(h.length?'<div class="spark" aria-label="Speed of your last runs">'+h.slice(-12).map(r=>'<i style="height:'+Math.round(r.w/mx*100)+'%" title="'+r.w+' WPM"></i>').join('')+'</div><ul>'+h.slice(-5).reverse().map(r=>'<li>'+esc(r.n)+': '+r.w+' WPM, '+r.a+'% accuracy</li>').join('')+'</ul>':'<p class="hint">Finish a level to see your speed chart here.</p>');
 }
-function elapsed(){ return g && g.t0 ? (performance.now() - g.t0) / 1000 : 0; }
-function updateStats(){
-  const t = elapsed(), wpm = t > 0.5 ? Math.round((g.ok/5) / (t/60)) : 0, total = g.ok + g.bad;
-  $('#sWpm').textContent = wpm;
-  $('#sAcc').textContent = (total ? Math.round(g.ok/total*100) : 100) + '%';
-  $('#sTime').textContent = t.toFixed(1) + 's';
-  const pct = g.pos / g.text.length * 100;
-  $('#fill').style.width = pct + '%'; $('#hiker').style.left = pct + '%';
+let mode='in';
+function authView(m){
+ mode=m;const up=m==='up';
+ $('at').textContent=up?'Create your account':'Log in';
+ $('asub').textContent=up?'It takes 10 seconds. Save your progress and see your dashboard.':'Welcome back. Log in to see your dashboard.';
+ $('nm').parentElement.style.display=up?'block':'none';
+ $('pw').autocomplete=up?'new-password':'current-password';
+ $('sub').textContent=up?'Create account':'Log in';
+ $('sw').textContent=up?'I already have an account':'Create an account';
+ $('aerr').textContent='';show('auth');$('em').focus();
 }
-function press(ch){
-  if(!g || g.done) return;
-  if(!g.t0){ g.t0 = performance.now(); g.timer = setInterval(updateStats, 200); }
-  const cur = spans[g.pos];
-  if(ch === g.text[g.pos]){
-    g.ok++; cur.className = 'ok'; g.pos++;
-    if(g.pos < spans.length) spans[g.pos].className = 'cur';
-  } else {
-    g.bad++; cur.className = 'bad';
-    setTimeout(() => { if(cur.className === 'bad') cur.className = 'cur'; }, 180);
+async function hash(p,s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s+p));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+$('af').onsubmit=async e=>{
+ e.preventDefault();
+ const err=m=>{$('aerr').textContent=m};
+ const em=$('em').value.trim().toLowerCase(),pw=$('pw').value,nm=$('nm').value.trim(),us=rd('tw_users')||{};
+ if(!/^\S+@\S+\.\S+$/.test(em))return err('Enter a valid email address.');
+ if(pw.length<6)return err('Password must be at least 6 characters.');
+ try{
+  if(mode==='up'){
+   if(!nm)return err('Enter your name.');
+   if(us[em])return err('This email already has an account. Log in instead.');
+   const salt=Math.random().toString(36).slice(2);
+   us[em]={name:nm,salt,h:await hash(pw,salt)};wr('tw_users',us);
+  }else{
+   const u=us[em];
+   if(!u||u.h!==await hash(pw,u.salt))return err('Email or password is wrong. Check and try again.');
   }
-  updateStats();
-  if(g.pos >= g.text.length) finish();
+ }catch(x){return err('Login is not available in this browser.')}
+ U={email:em,name:us[em].name};wr('tw_sess',em);
+ $('af').reset();loadS();map();show('home');
+};
+function logout(){U=null;try{if(window.firebase&&firebase.apps.length)firebase.auth().signOut()}catch(e){}try{localStorage.removeItem('tw_sess')}catch(e){}loadS();map();show('home')}
+$('sw').onclick=()=>authView(mode==='in'?'up':'in');
+$('gs').onclick=()=>show('home');
+$('hs').onclick=()=>authView('up');
+const FB={apiKey:"AIzaSyAFY84NcrpXO3TCrDvjQm4tbFghBJ31-uc",authDomain:"faster-typing.firebaseapp.com",projectId:"faster-typing",storageBucket:"faster-typing.firebasestorage.app",messagingSenderId:"58013373022",appId:"1:58013373022:web:4a3be4a6c6ac637b8bdacf",measurementId:"G-893S0HVDQB"}; /* Google sign-in: paste your Firebase web config here, like {apiKey:"...",authDomain:"...",projectId:"...",appId:"..."} */
+let fbReady=null;
+function loadFB(){
+ if(fbReady)return fbReady;
+ const add=s=>new Promise((ok,no)=>{const e=document.createElement('script');e.src=s;e.onload=ok;e.onerror=no;document.head.appendChild(e)});
+ const v='https://www.gstatic.com/firebasejs/10.12.2/';
+ fbReady=add(v+'firebase-app-compat.js').then(()=>add(v+'firebase-auth-compat.js')).then(()=>{firebase.initializeApp(FB)});
+ return fbReady;
 }
-function finish(){
-  g.done = true; clearInterval(g.timer);
-  const t = elapsed(), wpm = Math.round((g.ok/5) / (t/60)), acc = Math.round(g.ok/(g.ok+g.bad)*100), L = LEVELS[g.i];
-  let stars = 0;
-  if(wpm >= L.wpm && acc >= 85) stars = 1;
-  if(stars && wpm >= L.wpm + 8 && acc >= 92) stars = 2;
-  if(stars === 2 && wpm >= L.wpm + 16 && acc >= 97) stars = 3;
-  const old = state.levels[g.i] || {stars:0, bestWpm:0, bestAcc:0};
-  state.levels[g.i] = {stars:Math.max(old.stars, stars), bestWpm:Math.max(old.bestWpm, wpm), bestAcc:Math.max(old.bestAcc, acc)};
-  state.history = [...state.history, {t:Date.now(), wpm, acc, level:g.i}].slice(-30);
-  state.plays++;
-  saveLocal(); cloudSave();
-  $('#rTitle').textContent = stars ? 'Checkpoint reached!' : 'Almost there';
-  $('#rStars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
-  $('#rWpm').textContent = wpm; $('#rAcc').textContent = acc + '%'; $('#rTime').textContent = t.toFixed(1) + 's';
-  $('#rMsg').textContent = stars ? (g.i < LEVELS.length - 1 ? 'Level ' + (g.i + 2) + ' is unlocked.' : 'You reached the summit of Faster World!') : 'You need ' + L.wpm + ' WPM and 85% accuracy to pass. Slow down a little and keep it accurate.';
-  $('#rNext').classList.toggle('hidden', !stars || g.i >= LEVELS.length - 1);
-  $('#result').showModal();
-}
-hid.addEventListener('input', () => { const v = hid.value; hid.value = ''; for(const ch of v) press(ch); });
-hid.addEventListener('focus', () => { box.classList.add('focus'); $('#hint').textContent = 'Type the highlighted letter. Wrong keys will not move you forward.'; });
-hid.addEventListener('blur', () => { box.classList.remove('focus'); if(g && !g.done) $('#hint').textContent = 'Click the box to continue typing.'; });
-box.addEventListener('click', () => hid.focus());
-document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#playView').classList.contains('hidden') && !$('#result').open) leave(); });
-function leave(){ if(g){ clearInterval(g.timer); g.done = true; } show('trail'); }
-$('#backBtn').addEventListener('click', leave);
-$('#rNext').addEventListener('click', () => { $('#result').close(); start(g.i + 1); });
-$('#rRetry').addEventListener('click', () => { $('#result').close(); start(g.i); });
-$('#rTrail').addEventListener('click', () => { $('#result').close(); show('trail'); });
-$('#tabTrail').addEventListener('click', () => { if(g) { clearInterval(g.timer); g.done = true; } show('trail'); });
-$('#tabDash').addEventListener('click', () => { if(g) { clearInterval(g.timer); g.done = true; } show('dash'); });
-
-/* ============ 6. OPTIONAL GOOGLE LOGIN + CLOUD SAVE ============ */
-let user = null, fb = null;
-const configured = !firebaseConfig.apiKey.startsWith('YOUR');
-async function initFirebase(){
-  if(!configured) return;
-  try {
-    const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
-    const [appM, authM, fsM] = await Promise.all([import(base+'firebase-app.js'), import(base+'firebase-auth.js'), import(base+'firebase-firestore.js')]);
-    const app = appM.initializeApp(firebaseConfig);
-    fb = {auth:authM.getAuth(app), db:fsM.getFirestore(app), authM, fsM};
-    const btn = $('#authBtn'); btn.classList.remove('hidden');
-    btn.addEventListener('click', async () => {
-      try {
-        if(user) await authM.signOut(fb.auth);
-        else await authM.signInWithPopup(fb.auth, new authM.GoogleAuthProvider());
-      } catch(e){ alert('Sign-in problem: ' + (e.code || e.message) + '\nCheck that your site address is added in Firebase > Authentication > Settings > Authorized domains.'); }
-    });
-    authM.onAuthStateChanged(fb.auth, async u => {
-      user = u;
-      btn.textContent = u ? 'Sign out' : 'Sign in with Google';
-      $('#who').textContent = u ? (u.displayName || u.email) : 'Guest explorer';
-      if(u){
-        try {
-          const snap = await fsM.getDoc(fsM.doc(fb.db, 'users', u.uid));
-          if(snap.exists() && snap.data().progress) state = merge(state, snap.data().progress);
-          saveLocal(); await cloudSave();
-        } catch(e){ console.warn('Cloud load failed', e); }
-      }
-      if(!$('#trailView').classList.contains('hidden')) renderTrail();
-      if(!$('#dashView').classList.contains('hidden')) renderDash();
-    });
-  } catch(e){ console.warn('Firebase not available, playing as guest', e); }
-}
-async function cloudSave(){
-  if(!fb || !user) return;
-  try { await fb.fsM.setDoc(fb.fsM.doc(fb.db, 'users', user.uid), {name:user.displayName || '', progress:state, updated:Date.now()}, {merge:true}); }
-  catch(e){ console.warn('Cloud save failed', e); }
-}
-
-show('trail');
-initFirebase();
+$('gg').onclick=async()=>{
+ const err=m=>{$('aerr').textContent=m};
+ if(!FB)return err('Google sign-in is not set up yet. Add your Firebase settings to turn it on, or use email for now.');
+ try{
+  await loadFB();
+  const r=await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  U={email:r.user.email,name:r.user.displayName||r.user.email};
+  err('');loadS();map();show('home');
+ }catch(x){err('Google sign-in did not finish. Allow pop-ups and try again.')}
+};
+if(FB)loadFB().then(()=>firebase.auth().onAuthStateChanged(u=>{if(u&&!U){U={email:u.email,name:u.displayName||u.email};loadS();map()}})).catch(()=>{});
+$('sp').onchange=()=>{$('pw').type=$('sp').checked?'text':'password'};
+{const se=rd('tw_sess'),us=rd('tw_users')||{};if(se&&us[se])U={email:se,name:us[se].name}}
+loadS();
+map();
+$('game').style.display='none';$('res').style.display='none';
 </script>
 </body>
 </html>
