@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Faster World – Typing Adventure</title>
+<style>
+:root{--navy:#14264f;--sky:#a9c3e6;--teal:#1fb5d4;--sun:#f7d54a;--ink:#0d1b3a;--card:rgba(255,255,255,.1);--ok:#5fe3a1;--bad:#ff7b7b}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Trebuchet MS","Segoe UI",sans-serif;color:#fff;background:linear-gradient(180deg,#14264f 0%,#2a4a85 45%,#14264f 100%);min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 5vw;flex-wrap:wrap;gap:10px}
+.logo{font-size:1.5rem;font-weight:800}.logo b{color:var(--sun)}
+nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 16px;font-weight:700}
+.btn{background:var(--sun);color:var(--ink)}.ghost{background:var(--card);color:#fff;border:1px solid rgba(255,255,255,.3)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.hero{padding:6vh 5vw 9vh;max-width:900px}
+.hero h1{font-size:clamp(2.4rem,7vw,4.6rem);line-height:1.02;margin:0 0 16px}
+.hero p{max-width:520px;color:#dbe6f7;font-size:1.1rem}
+.mount{display:block;width:100%;height:90px}
+section{padding:24px 5vw}
+h2{margin:0 0 4px;font-size:1.8rem}.sub{color:#cfdcf2;margin:0 0 18px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.pill{background:var(--card);border:1px solid rgba(255,255,255,.25);padding:8px 14px;border-radius:99px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.lvl{background:var(--card);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:18px;text-align:left;color:#fff}
+.lvl .em{font-size:2rem}.lvl h3{margin:6px 0 2px}.lvl small{color:#cfdcf2}
+.lvl:disabled{opacity:.45;cursor:not-allowed}
+.lvl.done{border-color:var(--ok)}
+#game{display:none;background:rgba(8,18,45,.55);border-radius:18px;padding:22px;margin-top:20px;max-width:820px}
+#words{font-size:1.5rem;line-height:2.1;margin:12px 0}
+#words span{padding:2px 5px;border-radius:6px;margin-right:2px}
+#words .cur{background:var(--sun);color:var(--ink)}#words .ok{color:var(--ok)}#words .bad{color:var(--bad);text-decoration:line-through}
+#typed{width:100%;font-size:1.4rem;padding:12px 14px;border-radius:12px;border:2px solid var(--teal);background:#fff;color:var(--ink)}
+.live{display:flex;gap:16px;font-weight:700;color:var(--sun)}
+#result{margin-top:14px;font-size:1.1rem}
+#dash{display:none}
+.dash-card{background:var(--card);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:18px;max-width:520px}
+.dash-card p{margin:8px 0}
+.modal{position:fixed;inset:0;background:rgba(5,10,30,.75);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.open{display:flex}
+.box{background:#fff;color:var(--ink);border-radius:18px;padding:26px;width:100%;max-width:400px}
+.box h2{color:var(--navy)}
+.box input{width:100%;padding:12px;margin:6px 0 10px;border:2px solid #c5d3ea;border-radius:10px;font:inherit}
+.box .btn,.box .ghost{width:100%;margin-top:6px}
+.box .ghost{background:#eef3fb;color:var(--ink);border:1px solid #c5d3ea}
+.link{background:none;color:#2a5bd7;padding:6px 0;font-weight:600;text-decoration:underline;width:auto!important}
+#msg{min-height:22px;color:#c0262d;font-size:.95rem}#msg.good{color:#16794c}
+footer{padding:30px 5vw;color:#b8c8e6}
+@media(prefers-reduced-motion:no-preference){.hero h1{animation:rise .7s ease-out}@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Faster <b>World</b></div>
+  <nav id="nav"></nav>
+</header>
+
+<div class="hero">
+  <h1>Type your way across the map.</h1>
+  <p>Cross forests, rivers and mountains. Train your speed, sharpen your focus, and unlock a new challenge every time you play.</p>
+  <button class="btn" onclick="document.getElementById('levels').scrollIntoView({behavior:'smooth'})">Start the adventure</button>
+</div>
+<svg class="mount" viewBox="0 0 1200 90" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,90 0,50 250,10 400,60 700,25 1000,55 1200,40 1200,90" fill="#1fb5d4"/><polyline points="0,50 250,10 400,60 700,25 1000,55 1200,40" fill="none" stroke="#fff" stroke-width="4"/></svg>
+
+<section id="levels">
+  <h2>Choose your challenge</h2>
+  <p class="sub">Five quick games. One faster you. Finish a level with 80% accuracy to unlock the next.</p>
+  <div class="stats"><span class="pill" id="sBest">Best speed: 0 WPM</span><span class="pill" id="sPts">Points: 0</span><span class="pill" id="sWho">Playing as guest</span></div>
+  <div class="grid" id="grid"></div>
+
+  <div id="game">
+    <div class="live"><span id="gName"></span><span id="gTime">0s</span><span id="gWpm">0 WPM</span></div>
+    <div id="words"></div>
+    <input id="typed" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type the highlighted word, then press Space">
+    <div id="result"></div>
+    <button class="ghost" style="margin-top:10px" onclick="closeGame()">Back to map</button>
+  </div>
+</section>
+
+<section id="dash">
+  <h2>Your dashboard</h2>
+  <p class="sub">Your progress is saved to your account.</p>
+  <div class="dash-card" id="dashCard"></div>
+</section>
+
+<footer>Faster World. Practice a little every day.</footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="box">
+    <h2 id="mTitle">Log in</h2>
+    <input id="fName" placeholder="Your name" autocomplete="name" style="display:none">
+    <input id="fEmail" type="email" placeholder="Email" autocomplete="email">
+    <input id="fPass" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
+    <div id="msg" role="alert"></div>
+    <button class="btn" id="mGo">Log in</button>
+    <button class="ghost" id="mGoogle">Continue with Google</button>
+    <button class="link" id="mSwitch">New here? Create an account</button>
+    <button class="link" id="mForgot">Forgot password?</button>
+    <button class="link" id="mClose">Close</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ====== PASTE YOUR firebaseConfig HERE (Firebase Console > Project settings > Your apps) ====== */
+const firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_AUTH_DOMAIN",
+  projectId: "PASTE_PROJECT_ID",
+  storageBucket: "PASTE_STORAGE_BUCKET",
+  messagingSenderId: "PASTE_SENDER_ID",
+  appId: "PASTE_APP_ID"
+};
+/* ================================================================================================ */
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
+
+const LEVELS = [
+  {n:"Forest",e:"🌲",x:1,w:"tree leaf moss fern pine bark root path owl deer moon fox seed nest wind"},
+  {n:"River",e:"🌊",x:1.5,w:"water flow stream bridge canoe rock shore wave fish bank current paddle mist reed drift"},
+  {n:"Desert",e:"🏜️",x:2,w:"sand dune cactus mirage camel oasis heat dust sunset trail horizon scorpion canyon ember dry"},
+  {n:"Mountain",e:"🏔️",x:2.5,w:"summit glacier ridge climber boulder altitude avalanche valley granite blizzard peak rope cliff frost echo"},
+  {n:"Sky",e:"🚀",x:3,w:"cloud rocket orbit galaxy comet planet gravity nebula lunar meteor starlight cosmos eclipse aurora velocity"}
+];
+
+let user = null;
+let data = {name:"Guest", bestWpm:0, points:0, unlocked:1, games:0};
+let mode = "login";
+
+/* ---------- navigation bar ---------- */
+function renderNav(){
+  const n = $("nav");
+  if(user){
+    n.innerHTML = '<button class="ghost" id="nDash">Dashboard</button><button class="ghost" id="nOut">Log out</button>';
+    $("nDash").onclick = () => $("dash").scrollIntoView({behavior:"smooth"});
+    $("nOut").onclick = () => signOut(auth);
+  } else {
+    n.innerHTML = '<button class="ghost" id="nIn">Log in</button><button class="btn" id="nUp">Sign up</button>';
+    $("nIn").onclick = () => openModal("login");
+    $("nUp").onclick = () => openModal("signup");
+  }
+}
+
+/* ---------- stats + level map ---------- */
+function renderStats(){
+  $("sBest").textContent = "Best speed: " + data.bestWpm + " WPM";
+  $("sPts").textContent = "Points: " + data.points;
+  $("sWho").textContent = user ? "Logged in as " + data.name : "Playing as guest (log in to save)";
+  $("grid").innerHTML = "";
+  LEVELS.forEach((l,i) => {
+    const b = document.createElement("button");
+    const open = i < data.unlocked;
+    b.className = "lvl" + (i < data.unlocked-1 ? " done" : "");
+    b.disabled = !open;
+    b.innerHTML = '<div class="em">' + l.e + '</div><h3>' + l.n + '</h3><small>' + (open ? (i < data.unlocked-1 ? "Completed" : "Ready to play") : "Locked") + '</small>';
+    b.onclick = () => startLevel(i);
+    $("grid").appendChild(b);
+  });
+  const d = $("dash");
+  if(user){
+    d.style.display = "block";
+    $("dashCard").innerHTML = "<p><b>Name:</b> " + esc(data.name) + "</p><p><b>Email:</b> " + esc(user.email || "") + "</p><p><b>Best speed:</b> " + data.bestWpm + " WPM</p><p><b>Total points:</b> " + data.points + "</p><p><b>Levels unlocked:</b> " + data.unlocked + " of " + LEVELS.length + "</p><p><b>Games played:</b> " + data.games + "</p>";
+  } else d.style.display = "none";
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---------- database ---------- */
+async function loadData(u){
+  const ref = doc(db, "users", u.uid);
+  const snap = await getDoc(ref);
+  if(snap.exists()){
+    data = Object.assign({name:u.displayName || "Player", bestWpm:0, points:0, unlocked:1, games:0}, snap.data());
+  } else {
+    data = {name:u.displayName || (u.email || "Player").split("@")[0], bestWpm:0, points:0, unlocked:1, games:0};
+    await setDoc(ref, Object.assign({email:u.email || "", createdAt:serverTimestamp()}, data));
+  }
+}
+async function saveData(){
+  if(!user) return;
+  try{
+    await setDoc(doc(db, "users", user.uid), Object.assign({email:user.email || "", updatedAt:serverTimestamp()}, data), {merge:true});
+  }catch(e){ $("result").textContent += " (Could not save: " + e.code + ")"; }
+}
+
+onAuthStateChanged(auth, async u => {
+  user = u;
+  if(u){ try{ await loadData(u); }catch(e){ console.error(e); } }
+  else data = {name:"Guest", bestWpm:0, points:0, unlocked:1, games:0};
+  renderNav(); renderStats();
+});
+
+/* ---------- login / sign up modal ---------- */
+function openModal(m){ mode = m; setMode(); $("msg").textContent = ""; $("modal").classList.add("open"); $("fEmail").focus(); }
+function setMode(){
+  const up = mode === "signup";
+  $("mTitle").textContent = up ? "Create your account" : "Log in";
+  $("mGo").textContent = up ? "Sign up" : "Log in";
+  $("fName").style.display = up ? "block" : "none";
+  $("mSwitch").textContent = up ? "Already have an account? Log in" : "New here? Create an account";
+  $("mForgot").style.display = up ? "none" : "block";
+  $("fPass").autocomplete = up ? "new-password" : "current-password";
+}
+function say(t, good){ $("msg").textContent = t; $("msg").className = good ? "good" : ""; }
+function nice(e){
+  const m = {"auth/invalid-email":"That email address is not valid.","auth/missing-password":"Enter your password.","auth/weak-password":"Use a password with at least 6 characters.","auth/email-already-in-use":"This email already has an account. Log in instead.","auth/invalid-credential":"Wrong email or password.","auth/user-not-found":"No account with this email.","auth/wrong-password":"Wrong email or password.","auth/popup-closed-by-user":"Google sign-in was closed.","auth/unauthorized-domain":"Add this website to Authorized domains in Firebase.","auth/too-many-requests":"Too many tries. Wait a minute and try again.","auth/network-request-failed":"No internet connection."};
+  return m[e.code] || ("Something went wrong (" + (e.code || e.message) + ").");
+}
+$("mClose").onclick = () => $("modal").classList.remove("open");
+$("mSwitch").onclick = () => { mode = mode === "signup" ? "login" : "signup"; setMode(); say(""); };
+$("mGo").onclick = async () => {
+  const email = $("fEmail").value.trim(), pass = $("fPass").value;
+  try{
+    if(mode === "signup"){
+      const name = $("fName").value.trim() || email.split("@")[0];
+      const c = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(c.user, {displayName:name});
+      user = c.user; data.name = name; await loadData(c.user); data.name = name; await saveData();
+    } else await signInWithEmailAndPassword(auth, email, pass);
+    $("modal").classList.remove("open"); renderNav(); renderStats();
+  }catch(e){ say(nice(e)); }
+};
+$("mGoogle").onclick = async () => {
+  try{ await signInWithPopup(auth, new GoogleAuthProvider()); $("modal").classList.remove("open"); }
+  catch(e){ say(nice(e)); }
+};
+$("mForgot").onclick = async () => {
+  const email = $("fEmail").value.trim();
+  if(!email){ say("Type your email above first."); return; }
+  try{ await sendPasswordResetEmail(auth, email); say("Reset link sent. Check your inbox and spam folder.", true); }
+  catch(e){ say(nice(e)); }
+};
+
+/* ---------- typing game ---------- */
+let lvl = 0, list = [], idx = 0, okCount = 0, okChars = 0, t0 = 0, timer = null, running = false;
+function pick(arr, n){ const a = arr.slice(); const out = []; for(let i = 0; i < n; i++){ out.push(a[Math.floor(Math.random()*a.length)]); } return out; }
+function startLevel(i){
+  lvl = i; list = pick(LEVELS[i].w.split(" "), 15); idx = 0; okCount = 0; okChars = 0; running = false; clearInterval(timer);
+  $("gName").textContent = LEVELS[i].e + " " + LEVELS[i].n;
+  $("gTime").textContent = "0s"; $("gWpm").textContent = "0 WPM"; $("result").textContent = "";
+  $("game").style.display = "block"; $("typed").disabled = false; $("typed").value = "";
+  drawWords(); $("typed").focus(); $("game").scrollIntoView({behavior:"smooth"});
+}
+function drawWords(states){
+  $("words").innerHTML = list.map((w,i) => '<span class="' + (states && states[i] ? states[i] : (i === idx ? "cur" : "")) + '">' + w + '</span>').join(" ");
+}
+const states = [];
+function tick(){
+  const s = (Date.now() - t0) / 1000;
+  $("gTime").textContent = Math.floor(s) + "s";
+  $("gWpm").textContent = Math.round((okChars/5) / (s/60 || 1)) + " WPM";
+}
+$("typed").addEventListener("input", e => {
+  if(!running){ running = true; t0 = Date.now(); timer = setInterval(tick, 300); states.length = 0; }
+  const v = e.target.value;
+  if(v.endsWith(" ")){
+    const word = v.trim();
+    if(word === list[idx]){ states[idx] = "ok"; okCount++; okChars += list[idx].length + 1; } else states[idx] = "bad";
+    idx++; e.target.value = "";
+    if(idx >= list.length){ finish(); return; }
+    drawWords(states);
+  }
+});
+async function finish(){
+  clearInterval(timer); running = false; $("typed").disabled = true; drawWords(states);
+  const mins = (Date.now() - t0) / 60000;
+  const wpm = Math.round((okChars/5) / mins);
+  const acc = Math.round(okCount / list.length * 100);
+  const pts = Math.round(wpm * (acc/100) * LEVELS[lvl].x);
+  data.points += pts; data.games += 1;
+  if(wpm > data.bestWpm) data.bestWpm = wpm;
+  let txt = wpm + " WPM, " + acc + "% accuracy, +" + pts + " points. ";
+  if(acc >= 80){
+    if(lvl + 1 === data.unlocked && data.unlocked < LEVELS.length){ data.unlocked++; txt += "You unlocked " + LEVELS[lvl+1].n + "!"; }
+    else txt += "Level passed!";
+  } else txt += "Reach 80% accuracy to pass. Try again.";
+  if(!user) txt += " Log in to save your progress.";
+  $("result").textContent = txt; renderStats(); await saveData();
+}
+window.closeGame = () => { clearInterval(timer); running = false; $("game").style.display = "none"; $("levels").scrollIntoView({behavior:"smooth"}); };
+
+renderNav(); renderStats();
+</script>
+</body>
+</html>
